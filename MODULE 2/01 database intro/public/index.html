@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>selfie app</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+
+<body>
+    <p id='lat'></p>
+    <p id='lon'></p>
+    <button id="button">generate post</button>
+    <script>
+        var lat, lon
+        const button = document.getElementById('button')
+        button.addEventListener('click', async event => {
+            const data = {
+                lat,
+                lon
+            }
+            const options = {
+                method:'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }
+            const response = await fetch('/api',options)
+            const data0 = await response.json()
+            console.log(data0)
+        })
+        if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(async position => {
+                lat = position.coords.latitude
+                lon = position.coords.longitude
+                document.getElementById('lat').textContent = 'latitude = ' + lat + '°'
+                document.getElementById('lon').textContent = 'longitude = ' + lon + '°'
+            })
+        } else {
+            console.log('geolocation inavaleble')
+        }
+    </script>
+
+</body>
+
+</html>

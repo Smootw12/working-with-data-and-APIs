@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>selfie app</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.4.1/lib/p5.js"></script>
+</head>
+<style>
+</style>
+
+<body>
+    <p id="lat">click on get position</p>
+    <p id="lon"></p>
+    <button id="button0">get position</button>
+    <button id="button1">get the entire db</button>
+
+    <script>
+        function setup() {
+            createCanvas(400,400)
+            background(255,0,0)
+            const button0 = document.getElementById('button0')
+            const button1 = document.getElementById('button1')
+            button0.addEventListener('click', async event => {
+                if ('geolocation' in navigator) {
+                    console.log('geolocation available')
+                    navigator.geolocation.getCurrentPosition(async position => {
+                        const lat = position.coords.latitude
+                        const lon = position.coords.longitude
+                        document.getElementById('lat').textContent = 'latitude = ' + lat
+                        document.getElementById('lon').textContent = 'longitude = ' + lon
+                        const data = {
+                            lat,
+                            lon
+                        }
+                        const options = {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(data)
+                        }
+                        const response = await fetch('/api', options)
+                        const json = await response.json();
+                        console.log(json)
+
+                    })
+                } else {
+                    console.log('geolocation in not avaible')
+                }
+            })
+            button1.addEventListener('click', async event => {
+                const response = await fetch('/api')
+                const data = await response.json()
+                console.log(data)
+                for (item of data) {
+                    const root = document.createElement('div')
+                    const positionElement = document.createElement('div')
+                    const timeElement = document.createElement('div')
+                    positionElement.textContent = `position = ${item.lat}, ${item.lon}`
+                    const humanReadableDate = new Date(item.timestamp).toLocaleDateString()
+                    timeElement.textContent = `date = ${humanReadableDate}`
+                    document.body.append(positionElement, timeElement)
+                }
+            })
+        }
+    </script>
+</body>
+
+</html>

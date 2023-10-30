@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>selfie app</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+
+<body>
+    <p id="lat">click the button to get the position</p>
+    <p id="lon"></p>
+    <button id="button">get position</button>
+    <button id="getDatabase">get entire database</button>
+    <p></p>
+    <p></p>
+    <script>
+        const buttonA = document.getElementById('button')
+        const buttonB = document.getElementById('getDatabase')
+        buttonA.addEventListener('click', async event => {
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(async position => {
+                    const lat = position.coords.latitude
+                    const lon = position.coords.longitude
+                    document.getElementById('lon').textContent = 'latitude: ' + lat
+                    document.getElementById('lat').textContent = 'longitude: ' + lat
+                    const data = {
+                        lat,
+                        lon
+                    };
+                    const options = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    };
+                    const response = await fetch('/api', options);
+                    const json = await response.json();
+                    console.log(json);
+                })
+            } else {
+                document.getElementById('lat').textContent = 'geolocation unavalible'
+            }
+        })
+        buttonB.addEventListener('click', async event => {
+            const response = await fetch('/api')
+            const data = await response.json()
+            for(item of data){
+               const root = document.createElement('div')
+               const position = document.createElement('div')
+               const date = document.createElement('div')
+               position.textContent = `position: ${item.lat}°,${item.lon}°`
+               const dateString = new Date(item.timestamp).toLocaleString()
+               date.textContent = `${dateString}`
+               root.append(position, date)
+               document.body.append(root)
+            }
+            console.log(data)
+
+        })
+    </script>
+
+</body>
+
+</html>

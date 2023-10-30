@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Coding Train: Data and APIs Project 1</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+    integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+    crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+    integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+    crossorigin=""></script>
+</head>
+<style>
+  #IssMap {
+    height: 400px;
+  }
+
+</style>
+
+<body>
+  <div id="IssMap"></div>
+  <h1>Where is the ISS?</h1>
+  <p id="lat"></p>
+  <p id="lon"></p>
+  <button onclick="buttonPressed()">Reset Position</button>
+  <script>
+    const apiurl = 'https://api.wheretheiss.at/v1/satellites/25544'
+    const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    const attribution =
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    //make the map and tiles
+    const mymap = L.map('IssMap');
+    const tiles = L.tileLayer(tileUrl, {
+      attribution
+    }).addTo(mymap)
+
+    // Making a marker
+    var IssIcon = L.icon({
+      iconUrl: 'iss200.png',
+      iconSize: [80, 40],
+      iconAnchor: [40, 20],
+    });
+    const marker = L.marker([0, 0], {
+      icon: IssIcon
+    }).addTo(mymap)
+    //creating a button function
+    function buttonPressed() {
+      firstTime = true;
+      getISS();
+    }
+
+    var firstTime = true;
+    async function getISS() {
+      const response = await fetch(apiurl)
+      const data = await response.json()
+      marker.setLatLng([data.latitude, data.longitude])
+      if (firstTime) {
+        mymap.setView([data.latitude, data.longitude], 7)
+        firstTime = false
+      }
+      document.getElementById('lat').textContent = 'Latitude = ' + data.latitude.toFixed(2) + '°'
+      document.getElementById('lon').textContent = 'Longitude = ' + data.longitude.toFixed(2) + '°'
+
+    }
+    getISS()
+    setInterval(getISS, 1000)
+  </script>
+</body>
+
+</html>
